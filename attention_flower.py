@@ -2,27 +2,24 @@
 # -*- coding:utf-8 -*-
 
 '''
-@Create Time : 2021/7/28 12:57 
+@Create Time : 2022/2/27 16:19 
 @Author : Gabriel
-@File : resnet_flowers.py 
+@File : attention_flower.py
 @Project:ImageClassification
-@About :
-使用resnet实现花卉分类
+@About : 在resnet后增加注意力机制
 '''
-
 import os
+
+from sklearn.model_selection import train_test_split
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # 2表示只显示错误信息
 
 import tensorflow as tf
 from tensorflow.keras import layers, optimizers, datasets, Sequential, losses
-from resnet import resnet18
-from sklearn.model_selection import train_test_split
-import cv2
-import numpy as np
-from tensorflow.keras.applications.resnet import ResNet50
+import attentionnet
 
 tf.random.set_seed(2345)
+tf.config.experimental_run_functions_eagerly(True)
 
 # 设置GPU的最大使用量
 gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
@@ -109,15 +106,11 @@ class FlowerClassification:
 
         # tensorboard相关配置
         curr_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        log_dir = 'log/resnet_' + curr_time
+        log_dir = 'log/attention-net_' + curr_time
         tensorboard = tf.keras.callbacks.TensorBoard(log_dir=log_dir)
 
-        # 使用逆时学习率衰减
-        inverse_time_decay = optimizers.schedules.InverseTimeDecay(
-            initial_learning_rate=1e-2, decay_rate=0.1, decay_steps=10
-        )
+        model = attentionnet.resnet18(num_classes=5, attention_type=1)
 
-        model = resnet18(num_classes=5)
         model.build(input_shape=(None, 100, 100, 3))
         model.summary()
 

@@ -162,7 +162,7 @@ class DenseNet(tf.keras.Model):
         return x
 
 
-def densenet():
-    return DenseNet(num_classes=2, num_init_features=64, growth_rate=32, block_layers=[2, 2, 2, 2],
+def densenet(num_classes):
+    return DenseNet(num_classes=num_classes, num_init_features=64, growth_rate=32, block_layers=[2, 2, 2, 2],
                     compression_rate=0.5,
                     drop_rate=0.5)

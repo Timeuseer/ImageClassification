@@ -91,5 +91,5 @@ class ResNet(keras.Model):
         return res_blocks
 
 
-def resnet18():
-    return ResNet([2, 2, 2, 2], num_classes=5)
+def resnet18(num_classes):
+    return ResNet([2, 2, 2, 2], num_classes=num_classes)

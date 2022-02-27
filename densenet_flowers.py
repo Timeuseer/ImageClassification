@@ -13,11 +13,11 @@ import os
 
 # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # 2表示只显示错误信息
 import tensorflow as tf
+from tensorflow.keras import layers, optimizers, datasets, Sequential, losses
+from densenet import densenet
+from tensorflow.keras.applications.densenet import DenseNet121
 from sklearn.model_selection import train_test_split
 from tensorflow import keras
-from tensorflow.keras import optimizers, losses
-
-from densenet import densenet
 
 # tf.config.set_soft_device_placement = False
 tf.random.set_seed(2345)
@@ -25,10 +25,10 @@ tf.compat.v1.enable_eager_execution()
 
 
 # 设置GPU的最大使用量
-# gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
-# tf.config.experimental.set_virtual_device_configuration(
-#     gpus[0], [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4096)]
-# )
+gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
+tf.config.experimental.set_virtual_device_configuration(
+    gpus[0], [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4096)]
+)
 
 
 def load_data(dir):
@@ -123,7 +123,7 @@ class FlowerClassification:
         )
         # 2、逆时衰减 lr = lr0 * (1/(1+decay_rate*(t/decay_step)))
         inverse_time_decay = optimizers.schedules.InverseTimeDecay(
-            initial_learning_rate=1e-3, decay_rate=0.01, decay_steps=self.batch_size * 100
+            initial_learning_rate=1e-3, decay_rate=0.01, decay_steps=self.batch_size*100
         )
         # 3、指数衰减  lr = lr0 *(decay_rate^(t/decay_step))
         exponential_decay = optimizers.schedules.ExponentialDecay(
@@ -134,14 +134,11 @@ class FlowerClassification:
             initial_learning_rate=1e-3, decay_steps=1
         )
 
-        # model = densenet()
-        # model = DenseNet121(weights=None, classes=5)
-        from cnn import cnnnet
-        model = cnnnet(9)
-        model.build(input_shape=(None, 300, 300, 1))
+        model = densenet(num_classes=5)
+        model.build(input_shape=(None, 300, 300, 3))
         model.summary()
         # 绘制网络流程图
-        keras.utils.plot_model(model, "./NetImage/DenseNet.png", show_shapes=True, show_layer_names=True)
+        keras.utils.plot_model(model, "./NetImage/DenseNet.png",show_shapes=True,show_layer_names=True)
         # optimizer = optimizers.Adam(1e-3)
         optimizer = optimizers.Adam(inverse_time_decay)  # 自衰减学习率
         model.compile(optimizer=optimizer, loss=losses.CategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
